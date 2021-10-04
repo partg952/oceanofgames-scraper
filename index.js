@@ -3,6 +3,7 @@ const app = express();
 const cors = require("cors");
 const request = require("requests");
 const Cheerio = require("cheerio");
+const { eq } = require("cheerio/lib/api/traversing");
 const PORT = process.env.PORT || 8080;
 let data_arr = [];
 app.get("/",(req,res)=>{
@@ -10,7 +11,14 @@ app.get("/",(req,res)=>{
         
         const $ = Cheerio.load(data);
         $('div.post-details').each(function(i){
-            data_arr.push($(this).text())
+            let obj = {
+                title:$('h2.title > a').eq(i).text(),
+                url:$('h2.title > a').eq(i).attr("href"),
+                image_url:$('a.post-thumb > img').eq(i).attr("src"),
+                desc:$('div.post-content').eq(i).text().trim(),
+                genre:$('div.post-info > a').eq(i).text().trim()
+            }
+            data_arr.push(obj);
         })
         res.send(data_arr);
     })
